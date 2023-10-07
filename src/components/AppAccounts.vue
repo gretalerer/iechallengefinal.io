@@ -12,6 +12,9 @@
           }}</b-alert>
           <!-- b-alert v-if="error" variant="danger" show>{{ error }}</b-alert-->
 
+
+
+          <!-- ESTE ES EL BOTON PARA CREAR EL POP UP PARA CREAR ACCOUNT -->
           <button
             type="button"
             class="btn btn-success btn-sm"
@@ -131,6 +134,11 @@
         </b-form>
       </b-modal>
       <!-- End of Modal for Create Account-->
+
+      <!-- ESTE ES EL POPUP PARA EDIT ACCOUNT (AUN NO LO PUEDO VER PORQUE NO SE ME GUARDAN LAS ACCOUNTS)-->
+      
+      
+      
       <!-- Start of Modal for Edit Account-->
       <b-modal
         ref="editAccountModal"
@@ -163,17 +171,19 @@
 </template>
 
 <script>
-import axios from "axios";
+// PARTE DEL CODIGO QUE ACTUALLY HACE LAS COSAS
+import axios from "axios"; //library used for making http requests.
 export default {
   name: "AppAccounts",
   data() {
     return {
       accounts: [],
-      createAccountForm: {
+      createAccountForm: { //These properties represent the form fields used to create a new accoun
         name: "",
         currency: "",
+        country: "", 
       },
-      editAccountForm: {
+      editAccountForm: { //defines an object editAccountForm with two properties: id and name. These properties are used to edit existing account details.
         id: "",
         name: "",
       },
@@ -181,14 +191,15 @@ export default {
       message: "",
     };
   },
-  methods: {
+
+  methods: { //define methods that can be called within your Vue component
     /***************************************************
      * RESTful requests
      ***************************************************/
 
     //GET function
-    RESTgetAccounts() {
-      const path = `${process.env.VUE_APP_ROOT_URL}/accounts`;
+    RESTgetAccounts() { //makes a GET request to the specified API endpoint 
+      const path = `${process.env.VUE_APP_ROOT_URL}/accounts`; //this is the api endpoint
       axios
         .get(path)
         .then((response) => {
@@ -200,10 +211,10 @@ export default {
     },
 
     // POST function
-    RESTcreateAccount(payload) {
+    RESTcreateAccount(payload) { //makes a POST request to the API endpoint to create a new account
       const path = `${process.env.VUE_APP_ROOT_URL}/accounts`;
       axios
-        .post(path, payload)
+        .post(path, payload) //send a POST request to the specified URL (path)
         .then((response) => {
           this.RESTgetAccounts();
           // For message alert
@@ -222,7 +233,7 @@ export default {
     },
 
     // Update function
-    RESTupdateAccount(payload, accountId) {
+    RESTupdateAccount(payload, accountId) { //makes a PUT request to update an existing account with the specified accountId.
       const path = `${process.env.VUE_APP_ROOT_URL}/accounts/${accountId}`;
       axios
         .put(path, payload)
@@ -244,7 +255,7 @@ export default {
     },
 
     // Delete account
-    RESTdeleteAccount(accountId) {
+    RESTdeleteAccount(accountId) { //this method makes a DELETE request to remove an account with the specified accountId
       const path = `${process.env.VUE_APP_ROOT_URL}/accounts/${accountId}`;
       axios
         .delete(path)
@@ -284,6 +295,7 @@ export default {
       const payload = {
         name: this.createAccountForm.name,
         currency: this.createAccountForm.currency,
+        country: this.createAccountForm.country,
       };
       this.RESTcreateAccount(payload);
       this.initForm();
