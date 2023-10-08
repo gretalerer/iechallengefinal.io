@@ -31,8 +31,8 @@
                 <th scope="col">Account Balance</th>
                 <th scope="col">Account Currency</th>
                 <th scope="col">Account Status</th>
-                <th scope="col">Actions</th>
                 <th scope="col">Account Country</th>
+                <th scope="col">Actions</th>     
               </tr>
             </thead>
             <tbody>
