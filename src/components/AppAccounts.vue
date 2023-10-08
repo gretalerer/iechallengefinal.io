@@ -30,9 +30,9 @@
                 <th scope="col">Account Number</th>
                 <th scope="col">Account Balance</th>
                 <th scope="col">Account Currency</th>
-                <th scope="col">Account Country</th>
                 <th scope="col">Account Status</th>
                 <th scope="col">Actions</th>
+                <th scope="col">Account Country</th>
               </tr>
             </thead>
             <tbody>
@@ -51,6 +51,7 @@
                     account.status
                   }}</span>
                 </td>
+                <td>{{ account.country }}</td>
                 <td>
                   <div class="btn-group" role="group">
                     <button
@@ -124,7 +125,7 @@
               id="form-country-input"
               type="text"
               v-model="createAccountForm.country"
-              placeholder="Insert country"
+              placeholder="Spain"
               required
             >
             </b-form-input>
@@ -171,7 +172,6 @@
 </template>
 
 <script>
-// PARTE DEL CODIGO QUE ACTUALLY HACE LAS COSAS
 import axios from "axios"; //library used for making http requests.
 export default {
   name: "AppAccounts",
