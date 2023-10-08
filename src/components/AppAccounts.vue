@@ -178,12 +178,12 @@ export default {
   data() {
     return {
       accounts: [],
-      createAccountForm: { //These properties represent the form fields used to create a new accoun
+      createAccountForm: {
         name: "",
         currency: "",
         country: "", 
       },
-      editAccountForm: { //defines an object editAccountForm with two properties: id and name. These properties are used to edit existing account details.
+      editAccountForm: { 
         id: "",
         name: "",
       },
@@ -284,6 +284,7 @@ export default {
     initForm() {
       this.createAccountForm.name = "";
       this.createAccountForm.currency = "";
+      this.createAccountForm.country = "";
       this.editAccountForm.id = "";
       this.editAccountForm.name = "";
     },
