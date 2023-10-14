@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 env:
-  FRONTEND_WEBAPP_DEV: glerer-fe-dev
-  FRONTEND_WEBAPP_UAT: glerer-fe-uat
+  FRONTEND_WEBAPP_DEV: gretal-fe-dev
+  FRONTEND_WEBAPP_UAT: gretal-fe-uat
 
 jobs:
   build:
