@@ -1,334 +1,115 @@
+<!-- components/ShopPage.vue -->
 <template>
-  <div class="jumbotron vertical-center">
-    <div class="container">
-      <div class="row">
-        <div class="col-sm-12">
-          <h1>Accounts</h1>
-          <hr />
-          <br />
-          <!-- Allert Message -->
-          <b-alert v-if="showMessage" variant="success" show>{{
-            message
-          }}</b-alert>
-          <!-- b-alert v-if="error" variant="danger" show>{{ error }}</b-alert-->
-
-
-
-          <!-- ESTE ES EL BOTON PARA CREAR EL POP UP PARA CREAR ACCOUNT -->
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            v-b-modal.account-modal
-          >
-            Create Account
-          </button>
-          <br /><br />
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th scope="col">Account Name</th>
-                <th scope="col">Account Number</th>
-                <th scope="col">Account Balance</th>
-                <th scope="col">Account Currency</th>
-                <th scope="col">Account Status</th>
-                <th scope="col">Account Country</th>
-                <th scope="col">Actions</th>     
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="account in accounts" :key="account.id">
-                <td>{{ account.name }}</td>
-                <td>{{ account.account_number }}</td>
-                <td>{{ account.balance }}</td>
-                <td>{{ account.currency }}</td>
-                <td>
-                  <span
-                    v-if="account.status == 'Active'"
-                    class="badge badge-success"
-                    >{{ account.status }}</span
-                  >
-                  <span v-else class="badge badge-danger">{{
-                    account.status
-                  }}</span>
-                </td>
-                <td>{{ account.country }}</td>
-                <td>
-                  <div class="btn-group" role="group">
-                    <button
-                      type="button"
-                      class="btn btn-info btn-sm"
-                      v-b-modal.edit-account-modal
-                      @click="editAccount(account)"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-danger btn-sm"
-                      @click="deleteAccount(account)"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <footer class="text-center">
-            Copyright &copy; All Rights Reserved.
-          </footer>
-        </div>
+  <div class="shop-page">
+    <div class="header">
+      <h1>Cat food offering</h1>
+    </div>
+    <div v-for="(product, index) in products" :key="index" class="product-square">
+      <div class="product-content">
+        <h3>{{ product.name }}</h3>
+        <img :src="product.image" alt="Product Image">
+        <p>{{ product.description }}</p>
+        <button @click="addToCart(product)" class="choose-button">Choose this one</button>
       </div>
-      <b-modal
-        ref="addAccountModal"
-        id="account-modal"
-        title="Create a new account"
-        hide-backdrop
-        hide-footer
-      >
-        <b-form @submit="onSubmit" class="w-100">
-          <b-form-group
-            id="form-name-group"
-            label="Account Name:"
-            label-for="form-name-input"
-          >
-            <b-form-input
-              id="form-name-input"
-              type="text"
-              v-model="createAccountForm.name"
-              placeholder="Account Name"
-              required
-            >
-            </b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="form-currency-group"
-            label="Currency:"
-            label-for="form-currency-input"
-          >
-            <b-form-input
-              id="form-currency-input"
-              type="text"
-              v-model="createAccountForm.currency"
-              placeholder="$ or €"
-              required
-            >
-            </b-form-input>
-          </b-form-group>
-
-          <b-form-group
-            id="form-country-group"
-            label="Country:"
-            label-for="form-country-input"
-          >
-            <b-form-input
-              id="form-country-input"
-              type="text"
-              v-model="createAccountForm.country"
-              placeholder="Spain"
-              required
-            >
-            </b-form-input>
-          </b-form-group>
-
-          <b-button type="submit" variant="outline-info">Submit</b-button>
-        </b-form>
-      </b-modal>
-      <!-- End of Modal for Create Account-->
-
-      <!-- ESTE ES EL POPUP PARA EDIT ACCOUNT (AUN NO LO PUEDO VER PORQUE NO SE ME GUARDAN LAS ACCOUNTS)-->
-      
-      
-      
-      <!-- Start of Modal for Edit Account-->
-      <b-modal
-        ref="editAccountModal"
-        id="edit-account-modal"
-        title="Edit the account"
-        hide-backdrop
-        hide-footer
-      >
-        <b-form @submit="onSubmitUpdate" class="w-100">
-          <b-form-group
-            id="form-edit-name-group"
-            label="Account Name:"
-            label-for="form-edit-name-input"
-          >
-            <b-form-input
-              id="form-edit-name-input"
-              type="text"
-              v-model="editAccountForm.name"
-              placeholder="Account Name"
-              required
-            >
-            </b-form-input>
-          </b-form-group>
-          <b-button type="submit" variant="outline-info">Update</b-button>
-        </b-form>
-      </b-modal>
-      <!-- End of Modal for Edit Account-->
+    </div>
+    <div v-if="chosenProductMessage" class="thank-you-banner">
+      <p>{{ chosenProductMessage }}</p>
     </div>
   </div>
 </template>
 
 <script>
-import axios from "axios"; //library used for making http requests.
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/database';
+
 export default {
-  name: "AppAccounts",
   data() {
     return {
-      accounts: [],
-      createAccountForm: {
-        name: "",
-        currency: "",
-        country: "", 
-      },
-      editAccountForm: { 
-        id: "",
-        name: "",
-      },
-      showMessage: false,
-      message: "",
+      products: [
+        {
+          name: 'Purina Pro Plan',
+          image: require('@/assets/purinaproplan.jpeg'),
+          description: "Purina Pro Plans carbon footprint is like the energy output of a superstar DJ set. Picture the beats dropping at 5-15 kg CO2e/kg protein for those animal-powered proteins, with the manufacturing process laying down 1-2 kg CO2e/kg cat fuel – thats the equivalent of a small weekend road trip. The packaging brings the cool vibes at 0.5-1 kg CO2e/kg cat fuel, and the ride to your cats bowl is like a smooth cruise at 0.2-0.5 kg CO2e/kg cat fuel. Overall, we're talking about a total performance of 7 to 10 kg of CO2 equivalent per kg of Purina Pro Plan cat fuel.",
+        },
+        {
+          name: 'EcoTreat Vitality',
+          image: require('@/assets/ecotreatvitality.jpg'),
+          description: "The crafting, wrapping, and cruising phases of EcoTreats VitalBlend are finely tuned for eco-vibes, clocking in at a sleek 1-2 kg CO2e/kg for crafting, a stylish 0.5-1 kg CO2e/kg for wrapping, and a smooth 0.2-0.5 kg CO2e/kg for cruising. And hold up, thanks to the carbon-negative magic of the microalgae squad, the total carbon impact of EcoTreats VitalBlend is turning the pet food game upside down. We're talking a potential swing from net negative vibes to a cool 2-4 kg of CO2 equivalent per kg of pet food.",
+        },
+        // Repeat similar structure for other products
+      ],
+
+      chosenProductMessage: ''
+
     };
   },
 
-  methods: { //define methods that can be called within your Vue component
-    /***************************************************
-     * RESTful requests
-     ***************************************************/
+  methods: {
+    addToCart(product) {
+      const productRef = firebase.database().ref(`products/${product.name}`);
+      productRef.transaction((count) => (count || 0) + 1);
 
-    //GET function
-    RESTgetAccounts() { //makes a GET request to the specified API endpoint 
-      const path = `${process.env.VUE_APP_ROOT_URL}/accounts`; //this is the api endpoint
-      axios
-        .get(path)
-        .then((response) => {
-          this.accounts = response.data.accounts;
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+      // Update the message to be displayed to the user
+      this.chosenProductMessage = `You chose ${product.name}. Thank you for helping us!`;
+
+      // Clear the message after a certain time (e.g., 5 seconds)
+      setTimeout(() => {
+        this.chosenProductMessage = '';
+      }, 5000);
     },
-
-    // POST function
-    RESTcreateAccount(payload) { //makes a POST request to the API endpoint to create a new account
-      const path = `${process.env.VUE_APP_ROOT_URL}/accounts`;
-      axios
-        .post(path, payload) //send a POST request to the specified URL (path)
-        .then((response) => {
-          this.RESTgetAccounts();
-          // For message alert
-          this.message = "Account Created succesfully!";
-          // To actually show the message
-          this.showMessage = true;
-          // To hide the message after 3 seconds
-          setTimeout(() => {
-            this.showMessage = false;
-          }, 3000);
-        })
-        .catch((error) => {
-          console.error(error);
-          this.RESTgetAccounts();
-        });
-    },
-
-    // Update function
-    RESTupdateAccount(payload, accountId) { //makes a PUT request to update an existing account with the specified accountId.
-      const path = `${process.env.VUE_APP_ROOT_URL}/accounts/${accountId}`;
-      axios
-        .put(path, payload)
-        .then((response) => {
-          this.RESTgetAccounts();
-          // For message alert
-          this.message = "Account Updated succesfully!";
-          // To actually show the message
-          this.showMessage = true;
-          // To hide the message after 3 seconds
-          setTimeout(() => {
-            this.showMessage = false;
-          }, 3000);
-        })
-        .catch((error) => {
-          console.error(error);
-          this.RESTgetAccounts();
-        });
-    },
-
-    // Delete account
-    RESTdeleteAccount(accountId) { //this method makes a DELETE request to remove an account with the specified accountId
-      const path = `${process.env.VUE_APP_ROOT_URL}/accounts/${accountId}`;
-      axios
-        .delete(path)
-        .then((response) => {
-          this.RESTgetAccounts();
-          // For message alert
-          this.message = "Account Deleted succesfully!";
-          // To actually show the message
-          this.showMessage = true;
-          // To hide the message after 3 seconds
-          setTimeout(() => {
-            this.showMessage = false;
-          }, 3000);
-        })
-        .catch((error) => {
-          console.error(error);
-          this.RESTgetAccounts();
-        });
-    },
-
-    /***************************************************
-     * FORM MANAGEMENT
-     * *************************************************/
-
-    // Initialize forms empty
-    initForm() {
-      this.createAccountForm.name = "";
-      this.createAccountForm.currency = "";
-      this.createAccountForm.country = "";
-      this.editAccountForm.id = "";
-      this.editAccountForm.name = "";
-    },
-
-    // Handle submit event for create account
-    onSubmit(e) {
-      e.preventDefault(); //prevent default form submit form the browser
-      this.$refs.addAccountModal.hide(); //hide the modal when submitted
-      const payload = {
-        name: this.createAccountForm.name,
-        currency: this.createAccountForm.currency,
-        country: this.createAccountForm.country,
-      };
-      this.RESTcreateAccount(payload);
-      this.initForm();
-    },
-
-    // Handle submit event for edit account
-    onSubmitUpdate(e) {
-      e.preventDefault(); //prevent default form submit form the browser
-      this.$refs.editAccountModal.hide(); //hide the modal when submitted
-      const payload = {
-        name: this.editAccountForm.name,
-      };
-      this.RESTupdateAccount(payload, this.editAccountForm.id);
-      this.initForm();
-    },
-
-    // Handle edit button
-    editAccount(account) {
-      this.editAccountForm = account;
-    },
-
-    // Handle Delete button
-    deleteAccount(account) {
-      this.RESTdeleteAccount(account.id);
-    },
-  },
-
-  /***************************************************
-   * LIFECYClE HOOKS
-   ***************************************************/
-  created() {
-    this.RESTgetAccounts();
   },
 };
 </script>
+
+<style scoped>
+.shop-page {
+  display: flex;
+  flex-wrap: wrap; /* Allow items to wrap onto the next line */
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.header {
+  width: 100%;
+  text-align: center;
+  padding: 20px 0;
+  background-color: #42b983; /* Choose your desired background color */
+  color: white; /* Choose your desired text color */
+}
+
+.product-square {
+  background-color: #f0f0f0;
+  border-radius: 20px;
+  margin: 10px;
+  width: calc(50% - 20px); /* Set width to half of the container with margins */
+  box-sizing: border-box; /* Include padding and border in the width */
+}
+
+.product-content {
+  padding: 10px;
+  text-align: center;
+}
+
+img {
+  max-width: 100%;
+  max-height: 200px;
+  margin-bottom: 10px;
+}
+
+
+.choose-button {
+  background-color: #42b983;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.choose-button:hover {
+  background-color: #318d6e;
+}
+
+</style>
